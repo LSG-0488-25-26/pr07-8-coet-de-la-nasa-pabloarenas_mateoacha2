@@ -1,5 +1,6 @@
 package com.example.coet_de_la_nasa.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -28,16 +29,27 @@ class DogViewModel(
     }
 
     fun loadDogs(count: Int = 30) {
+        Log.d("DogViewModel", "loadDogs called with count=$count")
         _isLoading.value = true
         _error.value = null
 
         viewModelScope.launch(Dispatchers.IO) {
+            Log.d("DogViewModel", "Starting API call...")
             val result = repository.getDogFeed(count)
+            Log.d("DogViewModel", "API call completed: ${if (result.isSuccess) "SUCCESS" else "FAILURE"}")
+            
             withContext(Dispatchers.Main) {
                 _isLoading.value = false
                 result
-                    .onSuccess { _dogs.value = it }
-                    .onFailure { _error.value = it.message ?: "Error de red" }
+                    .onSuccess { 
+                        Log.d("DogViewModel", "Success! Received ${it.size} dogs")
+                        _dogs.value = it 
+                    }
+                    .onFailure { 
+                        val errorMsg = it.message ?: "Error de red"
+                        Log.e("DogViewModel", "Error loading dogs: $errorMsg", it)
+                        _error.value = errorMsg
+                    }
             }
         }
     }
