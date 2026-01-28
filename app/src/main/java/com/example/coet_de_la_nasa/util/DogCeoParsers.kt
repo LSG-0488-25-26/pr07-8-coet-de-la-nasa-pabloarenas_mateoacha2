@@ -23,3 +23,8 @@ fun breedFromDogCeoUrl(url: String): String {
         .replaceFirstChar { it.uppercase() }
 }
 
+fun breedToApiPath(breed: String): String {
+    // dog.ceo espera paths en minúsculas, sin espacios. Ej: "German Shepherd" -> "german shepherd"
+    return breed.trim().lowercase()
+}
+
