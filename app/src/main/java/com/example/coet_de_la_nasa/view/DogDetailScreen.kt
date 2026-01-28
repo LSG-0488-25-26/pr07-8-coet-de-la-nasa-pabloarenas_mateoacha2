@@ -9,8 +9,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -21,6 +24,7 @@ import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.coet_de_la_nasa.util.decodeFromNav
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DogDetailScreen(
     navController: NavController,
@@ -30,33 +34,32 @@ fun DogDetailScreen(
 ) {
     val imageUrl = decodeFromNav(encodedImageUrl)
 
-    Column(
+    Scaffold(
+        topBar = { TopAppBar(title = { Text(breed) }) },
         modifier = modifier
-            .fillMaxSize()
-            .padding(20.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        Text(
-            text = breed,
-            style = MaterialTheme.typography.headlineMedium
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        AsyncImage(
-            model = imageUrl,
-            contentDescription = breed,
-            contentScale = ContentScale.Crop,
+    ) { padding ->
+        Column(
             modifier = Modifier
-                .size(320.dp)
-                .clip(RoundedCornerShape(24.dp))
-        )
+                .fillMaxSize()
+                .padding(padding)
+                .padding(20.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            AsyncImage(
+                model = imageUrl,
+                contentDescription = breed,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .size(320.dp)
+                    .clip(RoundedCornerShape(24.dp))
+            )
 
-        Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(24.dp))
 
-        Button(onClick = { navController.popBackStack() }) {
-            Text("Volver")
+            Button(onClick = { navController.popBackStack() }) {
+                Text("Volver")
+            }
         }
     }
 }
