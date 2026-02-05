@@ -23,14 +23,24 @@ interface FootballApi {
         fun create(): FootballApi {
             val headerInterceptor = Interceptor { chain ->
                 val request = chain.request().newBuilder()
-                    .addHeader("User-Agent", "Mozilla/5.0 (Linux; Android 10) AppleWebKit/537.36")
+                    .addHeader("User-Agent", "Mozilla/5.0 (Linux; Android 13; Pixel 7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36")
                     .addHeader("Accept", "application/json")
+                    .addHeader("Accept-Language", "en-US,en;q=0.9")
                     .build()
                 chain.proceed(request)
             }
 
+            val loggingInterceptor = Interceptor { chain ->
+                val request = chain.request()
+                android.util.Log.d("FootballApi", "Request: ${request.url}")
+                val response = chain.proceed(request)
+                android.util.Log.d("FootballApi", "Response: ${response.code} - ${response.message}")
+                response
+            }
+
             val client = OkHttpClient.Builder()
                 .addInterceptor(headerInterceptor)
+                .addInterceptor(loggingInterceptor)
                 .build()
 
             return Retrofit.Builder()
