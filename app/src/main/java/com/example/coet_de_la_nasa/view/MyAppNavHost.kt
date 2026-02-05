@@ -15,24 +15,24 @@ fun MyAppNavHost(modifier: Modifier = Modifier) {
 
     NavHost(
         navController = navController,
-        startDestination = Routes.DogList.route,
+        startDestination = Routes.LeagueList.route,
         modifier = modifier
     ) {
-        composable(Routes.DogList.route) {
-            DogListScreen(navController = navController)
+        composable(Routes.LeagueList.route) {
+            LeagueListScreen(navController = navController)
         }
 
         composable(
-            route = Routes.DogDetail.route,
+            route = Routes.LeagueDetail.route,
             arguments = listOf(
-                navArgument("breed") { type = NavType.StringType },
-                navArgument("imageUrl") { type = NavType.StringType }
+                navArgument("leagueId") { type = NavType.StringType },
+                navArgument("leagueName") { type = NavType.StringType }
             )
         ) { backStackEntry ->
-            DogDetailScreen(
+            LeagueDetailScreen(
                 navController = navController,
-                breed = backStackEntry.arguments?.getString("breed") ?: "",
-                encodedImageUrl = backStackEntry.arguments?.getString("imageUrl") ?: ""
+                leagueId = backStackEntry.arguments?.getString("leagueId") ?: "",
+                leagueName = backStackEntry.arguments?.getString("leagueName") ?: ""
             )
         }
     }
