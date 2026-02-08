@@ -8,9 +8,8 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.TextButton
@@ -29,7 +28,6 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
@@ -107,12 +105,10 @@ fun LeagueListScreen(
                     }
                     else -> {
                         BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
-                            val minCellSize: Dp = if (maxWidth < 600.dp) 140.dp else 200.dp
-                            LazyVerticalGrid(
-                                columns = GridCells.Adaptive(minSize = minCellSize),
+                            val horizontalPadding = if (maxWidth < 600.dp) 16.dp else 48.dp
+                            LazyColumn(
                                 verticalArrangement = Arrangement.spacedBy(12.dp),
-                                horizontalArrangement = Arrangement.spacedBy(12.dp),
-                                contentPadding = PaddingValues(bottom = 72.dp),
+                                contentPadding = PaddingValues(bottom = 72.dp, start = horizontalPadding, end = horizontalPadding),
                                 modifier = Modifier.fillMaxSize()
                             ) {
                                 items(releaseGroups.value) { item ->
