@@ -27,6 +27,16 @@ fun MyAppNavHost(modifier: Modifier = Modifier) {
         }
 
         composable(
+            route = Routes.ColleccioDetail.route,
+            arguments = listOf(navArgument("collectionId") { type = NavType.LongType })
+        ) { backStackEntry ->
+            ColleccioDetailScreen(
+                navController = navController,
+                collectionId = backStackEntry.arguments?.getLong("collectionId") ?: 0L
+            )
+        }
+
+        composable(
             route = Routes.LeagueDetail.route,
             arguments = listOf(
                 navArgument("mbid") { type = NavType.StringType },

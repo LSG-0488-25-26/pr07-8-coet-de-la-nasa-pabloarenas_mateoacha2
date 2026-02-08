@@ -5,38 +5,43 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Button
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.unit.dp
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Delete
+import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import coil.compose.AsyncImage
-import com.example.coet_de_la_nasa.local.SavedAlbum
+import com.example.coet_de_la_nasa.local.CollectionWithCount
 import com.example.coet_de_la_nasa.nav.Routes
 import com.example.coet_de_la_nasa.viewmodel.MusicViewModel
 import com.example.coet_de_la_nasa.viewmodel.MusicViewModelFactory
@@ -49,92 +54,140 @@ fun ColleccioScreen(
 ) {
     val app = LocalContext.current.applicationContext as Application
     val vm: MusicViewModel = viewModel(factory = MusicViewModelFactory(app))
-    val saved = vm.savedAlbums.observeAsState(emptyList())
+    val collections by vm.collectionsWithCount.observeAsState(emptyList())
 
-    val punts = saved.value.size
-    val objectiu = 5
-    val objectiuAssolit = punts >= objectiu
+    var showNewCollectionDialog by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("La meva colleccio") },
+                title = { Text("COLECCIONES") },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Enrere")
+                        Icon(Icons.Default.ArrowBack, contentDescription = "Atrás")
                     }
-                },
-                actions = {
-                    Text(
-                        text = "Punts: $punts",
-                        style = MaterialTheme.typography.titleMedium,
-                        modifier = Modifier.padding(end = 16.dp)
-                    )
                 }
             )
+        },
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = { showNewCollectionDialog = true },
+                shape = RoundedCornerShape(16.dp)
+            ) {
+                Icon(Icons.Default.Add, contentDescription = "Nueva colección")
+            }
         },
         bottomBar = { AppBottomBar(navController = navController, currentRoute = Routes.Colleccio.route) },
         modifier = modifier
     ) { padding ->
-        if (saved.value.isEmpty()) {
+        if (collections.isEmpty()) {
             Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding),
+                modifier = Modifier.fillMaxSize().padding(padding),
                 contentAlignment = Alignment.Center
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(
-                        text = "Punts: 0. Objectiu: $objectiu albums.",
+                        text = "Aún no tienes colecciones.",
                         style = MaterialTheme.typography.titleMedium,
                         modifier = Modifier.padding(24.dp)
                     )
                     Text(
-                        text = "Busca albums i afegeix-los des del detall per sumar punts.",
+                        text = "Pulsa el botón + para crear la primera.",
                         style = MaterialTheme.typography.bodyLarge,
                         modifier = Modifier.padding(horizontal = 24.dp)
                     )
                 }
             }
         } else {
-            Column(modifier = Modifier.fillMaxSize().padding(padding)) {
-                if (objectiuAssolit) {
-                    Card(
-                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
-                        shape = RoundedCornerShape(12.dp),
-                        modifier = Modifier.padding(16.dp)
-                    ) {
-                        Text(
-                            text = "Objectiu assolit! Tens $punts punts.",
-                            style = MaterialTheme.typography.titleMedium,
-                            color = MaterialTheme.colorScheme.onPrimaryContainer,
-                            modifier = Modifier.padding(16.dp)
-                        )
-                    }
-                } else {
-                    Card(
-                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
-                        shape = RoundedCornerShape(12.dp),
-                        modifier = Modifier.padding(16.dp)
-                    ) {
-                        Text(
-                            text = "Punts: $punts / Objectiu: $objectiu albums",
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = MaterialTheme.colorScheme.onSurface,
-                            modifier = Modifier.padding(16.dp)
-                        )
-                    }
+            LazyColumn(
+                modifier = Modifier.fillMaxSize().padding(padding),
+                contentPadding = PaddingValues(16.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                items(collections) { c ->
+                    CollectionCard(
+                        collection = c,
+                        onClick = { navController.navigate(Routes.ColleccioDetail.createRoute(c.id)) }
+                    )
                 }
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
+            }
+        }
+    }
+
+    if (showNewCollectionDialog) {
+        NewCollectionDialog(
+            onDismiss = { showNewCollectionDialog = false },
+            onConfirm = { name ->
+                if (name.isNotBlank()) {
+                    vm.addCollection(name.trim())
+                    showNewCollectionDialog = false
+                }
+            }
+        )
+    }
+}
+
+@Composable
+private fun CollectionCard(
+    collection: CollectionWithCount,
+    onClick: () -> Unit
+) {
+    Card(
+        onClick = onClick,
+        shape = RoundedCornerShape(20.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Column(modifier = Modifier.padding(20.dp)) {
+            Text(
+                text = collection.name,
+                style = MaterialTheme.typography.titleLarge
+            )
+            Text(
+                text = "${collection.albumCount} álbum${if (collection.albumCount != 1) "s" else ""}",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+    }
+}
+
+@Composable
+private fun NewCollectionDialog(
+    onDismiss: () -> Unit,
+    onConfirm: (String) -> Unit
+) {
+    var name by remember { mutableStateOf("") }
+    Dialog(onDismissRequest = onDismiss) {
+        Card(
+            shape = RoundedCornerShape(16.dp),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Column(modifier = Modifier.padding(24.dp)) {
+                Text("Nueva colección", style = MaterialTheme.typography.titleLarge)
+                OutlinedTextField(
+                    value = name,
+                    onValueChange = { name = it },
+                    label = { Text("Nombre") },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 16.dp)
+                )
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 24.dp),
+                    horizontalArrangement = Arrangement.End
                 ) {
-                    items(saved.value) { album ->
-                        SavedAlbumCard(
-                            album = album,
-                            onDelete = { vm.removeFromCollection(album.mbid) }
-                        )
+                    TextButton(onClick = onDismiss) {
+                        Text("Cancelar")
+                    }
+                    Button(
+                        onClick = { onConfirm(name) },
+                        modifier = Modifier.padding(start = 8.dp)
+                    ) {
+                        Text("Crear")
                     }
                 }
             }
@@ -142,55 +195,3 @@ fun ColleccioScreen(
     }
 }
 
-@Composable
-private fun SavedAlbumCard(
-    album: SavedAlbum,
-    onDelete: () -> Unit
-) {
-    Card(
-        shape = RoundedCornerShape(20.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Box {
-            Row(
-                modifier = Modifier.padding(14.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                AsyncImage(
-                    model = album.coverUrl,
-                    contentDescription = album.title,
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier
-                        .height(72.dp)
-                        .fillMaxWidth(0.25f)
-                        .clip(RoundedCornerShape(8.dp))
-                )
-                Column(
-                    modifier = Modifier
-                        .weight(1f)
-                        .padding(horizontal = 12.dp)
-                ) {
-                    Text(
-                        text = album.title,
-                        style = MaterialTheme.typography.titleMedium,
-                        maxLines = 1
-                    )
-                    Text(
-                        text = album.artistName,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        maxLines = 1
-                    )
-                }
-                IconButton(onClick = onDelete) {
-                    Icon(
-                        imageVector = Icons.Default.Delete,
-                        contentDescription = "Eliminar"
-                    )
-                }
-            }
-        }
-    }
-}

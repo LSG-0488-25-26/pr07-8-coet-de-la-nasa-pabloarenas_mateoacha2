@@ -6,6 +6,8 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.example.coet_de_la_nasa.local.AppDatabase
+import com.example.coet_de_la_nasa.local.Collection
+import com.example.coet_de_la_nasa.local.CollectionWithCount
 import com.example.coet_de_la_nasa.local.SavedAlbum
 import com.example.coet_de_la_nasa.model.ReleaseGroupDetailUi
 import com.example.coet_de_la_nasa.model.ReleaseGroupItemUi
@@ -17,12 +19,18 @@ import kotlinx.coroutines.withContext
 class MusicViewModel(application: Application) : AndroidViewModel(application) {
 
     private val repository = MusicBrainzRepository()
-    private val dao = AppDatabase.getInstance(application).savedAlbumDao()
+    private val savedAlbumDao = AppDatabase.getInstance(application).savedAlbumDao()
+    private val collectionDao = AppDatabase.getInstance(application).collectionDao()
 
     private val _releaseGroups = MutableLiveData<List<ReleaseGroupItemUi>>(emptyList())
     val releaseGroups: LiveData<List<ReleaseGroupItemUi>> = _releaseGroups
 
-    val savedAlbums: LiveData<List<SavedAlbum>> = dao.getAllLiveData()
+    val collectionsWithCount: LiveData<List<CollectionWithCount>> = collectionDao.getAllWithCountLiveData()
+
+    fun getAlbumsForCollection(collectionId: Long): LiveData<List<SavedAlbum>> =
+        savedAlbumDao.getByCollectionIdLiveData(collectionId)
+
+    fun getCollection(collectionId: Long): LiveData<Collection?> = collectionDao.getByIdLiveData(collectionId)
 
     private val _isLoading = MutableLiveData(false)
     val isLoading: LiveData<Boolean> = _isLoading
@@ -71,15 +79,27 @@ class MusicViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    fun addToCollection(mbid: String, title: String, artistName: String, coverUrl: String) {
+    fun addToCollection(mbid: String, title: String, artistName: String, coverUrl: String, collectionId: Long) {
         viewModelScope.launch(Dispatchers.IO) {
-            dao.insert(SavedAlbum(mbid = mbid, title = title, artistName = artistName, coverUrl = coverUrl))
+            savedAlbumDao.insert(SavedAlbum(mbid = mbid, collectionId = collectionId, title = title, artistName = artistName, coverUrl = coverUrl))
         }
     }
 
-    fun removeFromCollection(mbid: String) {
+    fun removeFromCollection(mbid: String, collectionId: Long) {
         viewModelScope.launch(Dispatchers.IO) {
-            dao.deleteByMbid(mbid)
+            savedAlbumDao.deleteByMbidAndCollection(mbid, collectionId)
+        }
+    }
+
+    fun addCollection(name: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            collectionDao.insert(Collection(name = name))
+        }
+    }
+
+    fun deleteCollection(collectionId: Long) {
+        viewModelScope.launch(Dispatchers.IO) {
+            collectionDao.deleteById(collectionId)
         }
     }
 
