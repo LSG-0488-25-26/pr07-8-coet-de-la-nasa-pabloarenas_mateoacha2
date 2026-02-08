@@ -7,6 +7,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.example.coet_de_la_nasa.local.AppDatabase
 import com.example.coet_de_la_nasa.local.SavedAlbum
+import com.example.coet_de_la_nasa.model.ReleaseGroupDetailUi
 import com.example.coet_de_la_nasa.model.ReleaseGroupItemUi
 import com.example.coet_de_la_nasa.repository.MusicBrainzRepository
 import kotlinx.coroutines.Dispatchers
@@ -31,6 +32,12 @@ class MusicViewModel(application: Application) : AndroidViewModel(application) {
 
     private val _currentQuery = MutableLiveData("")
     val currentQuery: LiveData<String> = _currentQuery
+
+    private val _releaseGroupDetail = MutableLiveData<ReleaseGroupDetailUi?>(null)
+    val releaseGroupDetail: LiveData<ReleaseGroupDetailUi?> = _releaseGroupDetail
+
+    private val _detailLoading = MutableLiveData(false)
+    val detailLoading: LiveData<Boolean> = _detailLoading
 
     fun setQuery(query: String) {
         _currentQuery.value = query
@@ -71,6 +78,29 @@ class MusicViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch(Dispatchers.IO) {
             dao.deleteByMbid(mbid)
         }
+    }
+
+    fun loadDetail(mbid: String) {
+        _releaseGroupDetail.value = null
+        _detailLoading.value = true
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                kotlinx.coroutines.delay(500)
+                val result = repository.lookupReleaseGroup(mbid)
+                withContext(Dispatchers.Main) {
+                    _detailLoading.value = false
+                    _releaseGroupDetail.value = result.getOrNull()
+                }
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    _detailLoading.value = false
+                }
+            }
+        }
+    }
+
+    fun clearDetail() {
+        _releaseGroupDetail.value = null
     }
 
     private fun friendlyMessage(raw: String?): String {

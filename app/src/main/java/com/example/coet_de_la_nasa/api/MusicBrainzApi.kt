@@ -1,5 +1,6 @@
 package com.example.coet_de_la_nasa.api
 
+import com.example.coet_de_la_nasa.model.ReleaseGroup
 import com.example.coet_de_la_nasa.model.ReleaseGroupSearchResponse
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
@@ -7,6 +8,7 @@ import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.GET
+import retrofit2.http.Path
 import retrofit2.http.Query
 import java.util.concurrent.TimeUnit
 
@@ -23,6 +25,12 @@ interface MusicBrainzApi {
         @Query("limit") limit: Int = 20,
         @Query("offset") offset: Int = 0
     ): Response<ReleaseGroupSearchResponse>
+
+    @GET("release-group/{mbid}")
+    suspend fun lookupReleaseGroup(
+        @Path("mbid") mbid: String,
+        @Query("inc") inc: String = "artist-credits+tags+genres+ratings+releases+aliases+annotation+release-group-rels"
+    ): Response<ReleaseGroup>
 
     companion object {
         private const val BASE_URL = "https://musicbrainz.org/ws/2/"

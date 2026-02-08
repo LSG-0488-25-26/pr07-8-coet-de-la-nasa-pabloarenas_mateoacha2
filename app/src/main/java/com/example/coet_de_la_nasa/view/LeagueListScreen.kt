@@ -109,7 +109,9 @@ fun LeagueListScreen(
                                     LeagueCard(
                                         title = item.title,
                                         artistName = item.artistName,
-                                        coverUrl = item.coverUrl
+                                        coverUrl = item.coverUrl,
+                                        primaryType = item.primaryType,
+                                        firstReleaseDate = item.firstReleaseDate
                                     ) {
                                         navController.navigate(
                                             Routes.LeagueDetail.createRoute(

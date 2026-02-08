@@ -24,6 +24,8 @@ fun LeagueCard(
     title: String,
     artistName: String,
     coverUrl: String,
+    primaryType: String? = null,
+    firstReleaseDate: String? = null,
     contentPadding: PaddingValues = PaddingValues(0.dp),
     onClick: () -> Unit
 ) {
@@ -55,6 +57,14 @@ fun LeagueCard(
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
+                if (primaryType != null || !firstReleaseDate.isNullOrBlank()) {
+                    Text(
+                        text = listOfNotNull(primaryType, firstReleaseDate).joinToString(" · "),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(top = 2.dp)
+                    )
+                }
             }
         }
     }
