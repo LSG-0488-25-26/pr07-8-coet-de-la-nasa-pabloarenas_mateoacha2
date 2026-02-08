@@ -2,6 +2,7 @@ package com.example.coet_de_la_nasa.view
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -28,6 +29,7 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
@@ -61,6 +63,7 @@ fun LeagueListScreen(
                 }
             )
         },
+        bottomBar = { AppBottomBar(navController = navController, currentRoute = Routes.LeagueList.route) },
         modifier = modifier
     ) { padding ->
         Box(modifier = Modifier.fillMaxSize().padding(padding)) {
@@ -103,26 +106,29 @@ fun LeagueListScreen(
                         )
                     }
                     else -> {
-                        LazyVerticalGrid(
-                            columns = GridCells.Adaptive(minSize = 160.dp),
-                            verticalArrangement = Arrangement.spacedBy(12.dp),
-                            horizontalArrangement = Arrangement.spacedBy(12.dp),
-                            contentPadding = PaddingValues(bottom = 72.dp),
-                            modifier = Modifier.fillMaxSize()
-                        ) {
-                            items(releaseGroups.value) { item ->
-                                LeagueCard(
-                                    title = item.title,
-                                    artistName = item.artistName,
-                                    coverUrl = item.coverUrl
-                                ) {
-                                    navController.navigate(
-                                        Routes.LeagueDetail.createRoute(
-                                            mbid = item.mbid,
-                                            title = encodeForNav(item.title),
-                                            artistName = encodeForNav(item.artistName)
+                        BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+                            val minCellSize: Dp = if (maxWidth < 600.dp) 140.dp else 200.dp
+                            LazyVerticalGrid(
+                                columns = GridCells.Adaptive(minSize = minCellSize),
+                                verticalArrangement = Arrangement.spacedBy(12.dp),
+                                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                                contentPadding = PaddingValues(bottom = 72.dp),
+                                modifier = Modifier.fillMaxSize()
+                            ) {
+                                items(releaseGroups.value) { item ->
+                                    LeagueCard(
+                                        title = item.title,
+                                        artistName = item.artistName,
+                                        coverUrl = item.coverUrl
+                                    ) {
+                                        navController.navigate(
+                                            Routes.LeagueDetail.createRoute(
+                                                mbid = item.mbid,
+                                                title = encodeForNav(item.title),
+                                                artistName = encodeForNav(item.artistName)
+                                            )
                                         )
-                                    )
+                                    }
                                 }
                             }
                         }

@@ -37,6 +37,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.coet_de_la_nasa.local.SavedAlbum
+import com.example.coet_de_la_nasa.nav.Routes
 import com.example.coet_de_la_nasa.viewmodel.MusicViewModel
 import com.example.coet_de_la_nasa.viewmodel.MusicViewModelFactory
 
@@ -61,6 +62,7 @@ fun ColleccioScreen(
                 }
             )
         },
+        bottomBar = { AppBottomBar(navController = navController, currentRoute = Routes.Colleccio.route) },
         modifier = modifier
     ) { padding ->
         if (saved.value.isEmpty()) {
