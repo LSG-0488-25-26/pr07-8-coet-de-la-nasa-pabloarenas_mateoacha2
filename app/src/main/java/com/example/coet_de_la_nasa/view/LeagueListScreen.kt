@@ -1,5 +1,6 @@
 package com.example.coet_de_la_nasa.view
 
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -69,7 +70,8 @@ fun LeagueListScreen(
                     query = query.value,
                     onQueryChange = { vm.setQuery(it) },
                     onSearch = { vm.search(query.value) },
-                    enabled = !isLoading.value && query.value.isNotBlank()
+                    enabled = !isLoading.value && query.value.isNotBlank(),
+                    modifier = Modifier.padding(bottom = 16.dp)
                 )
 
                 when {
@@ -86,13 +88,18 @@ fun LeagueListScreen(
                             modifier = Modifier
                                 .fillMaxSize()
                                 .padding(16.dp),
-                            verticalArrangement = Arrangement.spacedBy(12.dp)
+                            verticalArrangement = Arrangement.spacedBy(16.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally
                         ) {
                             Text(
                                 text = error.value ?: "Error",
-                                style = MaterialTheme.typography.bodyLarge
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = MaterialTheme.colorScheme.error
                             )
-                            Button(onClick = { vm.search(query.value) }) {
+                            Button(
+                                onClick = { vm.search(query.value) },
+                                shape = RoundedCornerShape(12.dp)
+                            ) {
                                 Text("Tornar a intentar")
                             }
                         }

@@ -30,8 +30,9 @@ fun LeagueCard(
     onClick: () -> Unit
 ) {
     Card(
-        shape = RoundedCornerShape(16.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        shape = RoundedCornerShape(20.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
         modifier = Modifier
             .fillMaxWidth()
             .clickable { onClick() }
@@ -43,19 +44,21 @@ fun LeagueCard(
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(160.dp)
-                    .clip(RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp))
+                    .height(180.dp)
+                    .clip(RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp))
             )
-            Column(modifier = Modifier.padding(12.dp)) {
+            Column(modifier = Modifier.padding(14.dp)) {
                 Text(
                     text = title,
                     style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.onSurface
                 )
                 Text(
                     text = artistName,
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(top = 2.dp)
                 )
                 if (primaryType != null || !firstReleaseDate.isNullOrBlank()) {
                     Text(

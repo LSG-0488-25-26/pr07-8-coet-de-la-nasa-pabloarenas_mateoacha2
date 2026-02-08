@@ -18,11 +18,28 @@ data class ReleaseGroupItemUi(
 /**
  * Resum d’una release per la UI.
  */
+/** Resum d'una pista (track) per la UI. */
+data class TrackSummaryUi(
+    val title: String?,
+    val position: Int?,
+    val length: Long? = null
+)
+
+/** Resum d'un suport (media: CD, vinil, etc.) per la UI. */
+data class MediaSummaryUi(
+    val format: String?,
+    val trackCount: Int,
+    val tracks: List<TrackSummaryUi> = emptyList()
+)
+
 data class ReleaseSummaryUi(
     val id: String?,
     val title: String?,
     val date: String?,
-    val status: String?
+    val status: String?,
+    val country: String? = null,
+    val barcode: String? = null,
+    val media: List<MediaSummaryUi> = emptyList()
 )
 
 /**

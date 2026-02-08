@@ -26,6 +26,7 @@ data class ReleaseGroup(
     val aliases: List<Alias>? = null,
     @JsonAdapter(AnnotationDeserializer::class)
     val annotation: Annotation? = null,
+    @JsonAdapter(RelationsDeserializer::class)
     val relations: List<Relation>? = null
 )
 
@@ -38,7 +39,26 @@ data class Release(
     val title: String? = null,
     val date: String? = null,
     @SerializedName("status-id") val statusId: String? = null,
-    val status: String? = null
+    val status: String? = null,
+    val country: String? = null,
+    val barcode: String? = null,
+    val media: List<Media>? = null
+)
+
+data class Media(
+    @SerializedName("track-count")
+    @JsonAdapter(FlexibleIntDeserializer::class)
+    val trackCount: Int = 0,
+    val format: String? = null,
+    val tracks: List<Track>? = null
+)
+
+data class Track(
+    val title: String? = null,
+    @JsonAdapter(FlexibleNullableIntDeserializer::class)
+    val position: Int? = null,
+    val length: Long? = null,
+    val number: String? = null
 )
 
 data class Alias(

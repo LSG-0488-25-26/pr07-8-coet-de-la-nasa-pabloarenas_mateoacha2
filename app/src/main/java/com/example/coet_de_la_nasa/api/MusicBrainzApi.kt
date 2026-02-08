@@ -29,7 +29,7 @@ interface MusicBrainzApi {
     @GET("release-group/{mbid}")
     suspend fun lookupReleaseGroup(
         @Path("mbid") mbid: String,
-        @Query("inc") inc: String = "artist-credits+tags+genres+ratings+releases+aliases+annotation+release-group-rels"
+        @Query("inc") inc: String = "artist-credits+tags+genres+ratings+releases+aliases+annotation+release-group-rels+media"
     ): Response<ReleaseGroup>
 
     companion object {

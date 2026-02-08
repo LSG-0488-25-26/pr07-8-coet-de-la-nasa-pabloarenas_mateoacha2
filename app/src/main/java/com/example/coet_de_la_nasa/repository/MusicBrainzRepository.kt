@@ -1,11 +1,15 @@
 package com.example.coet_de_la_nasa.repository
 
 import com.example.coet_de_la_nasa.api.MusicBrainzApi
+import com.example.coet_de_la_nasa.model.Media
+import com.example.coet_de_la_nasa.model.MediaSummaryUi
 import com.example.coet_de_la_nasa.model.ReleaseGroup
 import com.example.coet_de_la_nasa.model.ReleaseGroupDetailUi
 import com.example.coet_de_la_nasa.model.ReleaseGroupItemUi
 import com.example.coet_de_la_nasa.model.ReleaseSummaryUi
 import com.example.coet_de_la_nasa.model.RelationSummaryUi
+import com.example.coet_de_la_nasa.model.Track
+import com.example.coet_de_la_nasa.model.TrackSummaryUi
 
 /**
  * Portadas desde Cover Art Archive: https://coverartarchive.org/release-group/{mbid}/front-500.jpg
@@ -87,7 +91,23 @@ private fun ReleaseGroup.toDetailUi(): ReleaseGroupDetailUi {
         ratingValue = rating?.value,
         ratingVotes = rating?.votesCount ?: 0,
         releases = releases?.map { r ->
-            ReleaseSummaryUi(id = r.id, title = r.title, date = r.date, status = r.status)
+            ReleaseSummaryUi(
+                id = r.id,
+                title = r.title,
+                date = r.date,
+                status = r.status,
+                country = r.country,
+                barcode = r.barcode,
+                media = r.media?.map { m: Media ->
+                    MediaSummaryUi(
+                        format = m.format,
+                        trackCount = m.trackCount,
+                        tracks = m.tracks?.map { t: Track ->
+                            TrackSummaryUi(title = t.title, position = t.position, length = t.length)
+                        }.orEmpty()
+                    )
+                }.orEmpty()
+            )
         }.orEmpty(),
         aliases = aliases?.mapNotNull { it.name }.orEmpty(),
         annotation = annotation?.text,

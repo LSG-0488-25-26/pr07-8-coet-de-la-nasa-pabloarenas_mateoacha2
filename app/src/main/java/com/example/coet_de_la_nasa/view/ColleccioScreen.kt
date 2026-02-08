@@ -99,18 +99,31 @@ fun ColleccioScreen(
         } else {
             Column(modifier = Modifier.fillMaxSize().padding(padding)) {
                 if (objectiuAssolit) {
-                    Text(
-                        text = "Objectiu assolit! Tens $punts punts.",
-                        style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.primary,
+                    Card(
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
+                        shape = RoundedCornerShape(12.dp),
                         modifier = Modifier.padding(16.dp)
-                    )
+                    ) {
+                        Text(
+                            text = "Objectiu assolit! Tens $punts punts.",
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer,
+                            modifier = Modifier.padding(16.dp)
+                        )
+                    }
                 } else {
-                    Text(
-                        text = "Punts: $punts / Objectiu: $objectiu albums",
-                        style = MaterialTheme.typography.bodyLarge,
+                    Card(
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+                        shape = RoundedCornerShape(12.dp),
                         modifier = Modifier.padding(16.dp)
-                    )
+                    ) {
+                        Text(
+                            text = "Punts: $punts / Objectiu: $objectiu albums",
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            modifier = Modifier.padding(16.dp)
+                        )
+                    }
                 }
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
@@ -135,13 +148,14 @@ private fun SavedAlbumCard(
     onDelete: () -> Unit
 ) {
     Card(
-        shape = RoundedCornerShape(16.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        shape = RoundedCornerShape(20.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
         modifier = Modifier.fillMaxWidth()
     ) {
         Box {
             Row(
-                modifier = Modifier.padding(12.dp),
+                modifier = Modifier.padding(14.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 AsyncImage(

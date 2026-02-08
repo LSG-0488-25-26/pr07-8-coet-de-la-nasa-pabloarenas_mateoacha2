@@ -12,7 +12,9 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -25,6 +27,7 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
@@ -55,6 +58,7 @@ fun LeagueDetailScreen(
     val vm: MusicViewModel = viewModel(factory = MusicViewModelFactory(app))
     val detail = vm.releaseGroupDetail.observeAsState(null)
     val detailLoading = vm.detailLoading.observeAsState(false)
+    val detailError = vm.detailError.observeAsState(null)
 
     LaunchedEffect(mbid) {
         vm.loadDetail(mbid)
@@ -100,6 +104,8 @@ fun LeagueDetailScreen(
                     title = title,
                     artistName = artistName,
                     coverUrl = coverUrl,
+                    detailError = detailError.value,
+                    onRetry = { vm.loadDetail(mbid) },
                     modifier = Modifier.padding(padding),
                     onAddToCollection = {
                         vm.addToCollection(mbid, title, artistName, coverUrl)
@@ -139,20 +145,23 @@ private fun DetailContent(
         Text(
             text = detail.title,
             style = MaterialTheme.typography.headlineMedium,
-            modifier = Modifier.padding(horizontal = 16.dp)
+            modifier = Modifier.padding(horizontal = 16.dp),
+            textAlign = TextAlign.Center
         )
         Text(
             text = detail.artistName,
             style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(top = 4.dp)
+            modifier = Modifier.padding(top = 4.dp),
+            textAlign = TextAlign.Center
         )
         if (detail.primaryType != null || !detail.firstReleaseDate.isNullOrBlank()) {
             Text(
                 text = listOfNotNull(detail.primaryType, detail.firstReleaseDate).joinToString(" · "),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(top = 4.dp)
+                modifier = Modifier.padding(top = 4.dp),
+                textAlign = TextAlign.Center
             )
         }
         if (!detail.disambiguation.isNullOrBlank()) {
@@ -160,91 +169,145 @@ private fun DetailContent(
                 text = detail.disambiguation,
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(top = 8.dp)
+                modifier = Modifier.padding(top = 8.dp),
+                textAlign = TextAlign.Center
             )
         }
         if (detail.secondaryTypes?.isNotEmpty() == true) {
             Text(
-                text = "Tipus: ${detail.secondaryTypes.joinToString(", ")}",
+                text = "TIPO: ${detail.secondaryTypes.joinToString(", ")}",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(top = 4.dp)
+                modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
+                textAlign = TextAlign.Center
             )
         }
         if (detail.genres.isNotEmpty()) {
             Text(
-                text = "Genres: ${detail.genres.take(10).joinToString(", ")}",
+                text = "GÉNEROS: ${detail.genres.take(10).joinToString(", ")}",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(top = 8.dp)
+                modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+                textAlign = TextAlign.Center
             )
         }
         if (detail.tags.isNotEmpty()) {
             Text(
-                text = "Tags: ${detail.tags.take(10).joinToString(", ")}",
+                text = "ETIQUETAS: ${detail.tags.take(10).joinToString(", ")}",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(top = 4.dp)
+                modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
+                textAlign = TextAlign.Center
             )
         }
         if (detail.ratingValue != null && detail.ratingVotes > 0) {
             Text(
-                text = "Valoracio: ${detail.ratingValue} (${detail.ratingVotes} vots)",
+                text = "VALORACIÓN: ${detail.ratingValue} (${detail.ratingVotes} votos)",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(top = 4.dp)
+                modifier = Modifier.padding(top = 4.dp),
+                textAlign = TextAlign.Center
             )
         }
         if (!detail.annotation.isNullOrBlank()) {
             Text(
-                text = "Anotacio: ${detail.annotation.take(500)}${if (detail.annotation.length > 500) "..." else ""}",
+                text = "ANOTACIÓN: ${detail.annotation.take(500)}${if (detail.annotation.length > 500) "..." else ""}",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 12.dp)
+                modifier = Modifier.fillMaxWidth().padding(top = 12.dp),
+                textAlign = TextAlign.Center
             )
         }
         if (detail.releases.isNotEmpty()) {
             Text(
-                text = "Releases (${detail.releases.size}):",
+                text = "LANZAMIENTOS (${detail.releases.size}):",
                 style = MaterialTheme.typography.titleSmall,
                 color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 12.dp)
+                modifier = Modifier.fillMaxWidth().padding(top = 12.dp),
+                textAlign = TextAlign.Center
             )
             detail.releases.take(15).forEach { r ->
+                val statusEs = (r.status?.lowercase())?.let { when (it) {
+                    "official" -> "Oficial"; "bootleg" -> "Bootleg"; "promotional" -> "Promocional"; else -> r.status
+                } } ?: r.status
+                val extra = listOfNotNull(r.country, r.barcode).joinToString(" · ").takeIf { it.isNotBlank() }
                 Text(
-                    text = "${r.title ?: r.id ?: "-"} · ${r.date ?: "-"} · ${r.status ?: "-"}",
+                    text = buildString {
+                        append(r.title ?: r.id ?: "-")
+                        append(" · ")
+                        append(r.date ?: "-")
+                        append(" · ")
+                        append(statusEs ?: "-")
+                        if (!extra.isNullOrBlank()) append(" · $extra")
+                    },
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.fillMaxWidth().padding(top = 2.dp)
+                    modifier = Modifier.fillMaxWidth().padding(top = 2.dp),
+                    textAlign = TextAlign.Center
                 )
+                r.media.forEach { m ->
+                    val formatEs = m.format?.lowercase()?.let { f ->
+                        when {
+                            f.contains("vinyl") -> "Vinilo"
+                            f.contains("cd") -> "CD"
+                            f.contains("digital") -> "Digital"
+                            else -> m.format
+                        }
+                    } ?: m.format ?: "?"
+                    val formatLine = "$formatEs · ${m.trackCount} pistas"
+                    Text(
+                        text = "  $formatLine",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.outline,
+                        modifier = Modifier.fillMaxWidth().padding(top = 1.dp),
+                        textAlign = TextAlign.Center
+                    )
+                    m.tracks.take(5).forEach { t ->
+                        Text(
+                            text = "    ${t.position ?: "-"}. ${t.title ?: "-"}",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.outline,
+                            modifier = Modifier.fillMaxWidth().padding(top = 1.dp),
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                    if (m.tracks.size > 5) {
+                        Text(
+                            text = "    ... y ${m.tracks.size - 5} pistas más",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.outline,
+                            modifier = Modifier.fillMaxWidth().padding(top = 1.dp),
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                }
             }
             if (detail.releases.size > 15) {
                 Text(
-                    text = "... i ${detail.releases.size - 15} mes",
+                    text = "... y ${detail.releases.size - 15} más",
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.fillMaxWidth().padding(top = 2.dp)
+                    modifier = Modifier.fillMaxWidth().padding(top = 2.dp),
+                    textAlign = TextAlign.Center
                 )
             }
         }
         if (detail.aliases.isNotEmpty()) {
             Text(
-                text = "Alias: ${detail.aliases.take(10).joinToString(", ")}${if (detail.aliases.size > 10) "..." else ""}",
+                text = "ALIAS: ${detail.aliases.take(10).joinToString(", ")}${if (detail.aliases.size > 10) "..." else ""}",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
+                modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+                textAlign = TextAlign.Center
             )
         }
         if (detail.relations.isNotEmpty()) {
             Text(
-                text = "Relacions (${detail.relations.size}):",
+                text = "RELACIONES (${detail.relations.size}):",
                 style = MaterialTheme.typography.titleSmall,
                 color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.fillMaxWidth().padding(top = 12.dp)
+                modifier = Modifier.fillMaxWidth().padding(top = 12.dp),
+                textAlign = TextAlign.Center
             )
             detail.relations.take(10).forEach { rel ->
                 val line = buildString {
@@ -256,25 +319,34 @@ private fun DetailContent(
                     text = line,
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.fillMaxWidth().padding(top = 2.dp)
+                    modifier = Modifier.fillMaxWidth().padding(top = 2.dp),
+                    textAlign = TextAlign.Center
                 )
             }
             if (detail.relations.size > 10) {
                 Text(
-                    text = "... i ${detail.relations.size - 10} mes",
+                    text = "... y ${detail.relations.size - 10} más",
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.fillMaxWidth().padding(top = 2.dp)
+                    modifier = Modifier.fillMaxWidth().padding(top = 2.dp),
+                    textAlign = TextAlign.Center
                 )
             }
         }
-        Spacer(modifier = Modifier.height(20.dp))
-        Button(onClick = onAddToCollection) {
-            Text("Afegir a la colleccio")
+        Spacer(modifier = Modifier.height(24.dp))
+        Button(
+            onClick = onAddToCollection,
+            shape = RoundedCornerShape(12.dp),
+            elevation = ButtonDefaults.buttonElevation(defaultElevation = 2.dp)
+        ) {
+            Text("AÑADIR A LA COLECCIÓN")
         }
-        Spacer(modifier = Modifier.height(8.dp))
-        Button(onClick = onBack) {
-            Text("Volver")
+        Spacer(modifier = Modifier.height(12.dp))
+        OutlinedButton(
+            onClick = onBack,
+            shape = RoundedCornerShape(12.dp)
+        ) {
+            Text("VOLVER")
         }
     }
 }
@@ -284,6 +356,8 @@ private fun FallbackDetailContent(
     title: String,
     artistName: String,
     coverUrl: String,
+    detailError: String? = null,
+    onRetry: (() -> Unit)? = null,
     modifier: Modifier = Modifier,
     onAddToCollection: () -> Unit,
     onBack: () -> Unit
@@ -291,9 +365,9 @@ private fun FallbackDetailContent(
     Column(
         modifier = modifier
             .fillMaxSize()
+            .verticalScroll(rememberScrollState())
             .padding(20.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
         AsyncImage(
             model = coverUrl,
@@ -308,21 +382,45 @@ private fun FallbackDetailContent(
         Text(
             text = title,
             style = MaterialTheme.typography.headlineMedium,
-            modifier = Modifier.padding(horizontal = 16.dp)
+            modifier = Modifier.padding(horizontal = 16.dp),
+            textAlign = TextAlign.Center
         )
         Text(
             text = artistName,
             style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(top = 4.dp)
+            modifier = Modifier.padding(top = 4.dp),
+            textAlign = TextAlign.Center
         )
-        Spacer(modifier = Modifier.height(16.dp))
-        Button(onClick = onAddToCollection) {
-            Text("Afegir a la colleccio")
+        if (!detailError.isNullOrBlank()) {
+            Text(
+                text = detailError,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.error,
+                modifier = Modifier.fillMaxWidth().padding(top = 12.dp),
+                textAlign = TextAlign.Center
+            )
+            onRetry?.let { retry ->
+                OutlinedButton(
+                    onClick = retry,
+                    shape = RoundedCornerShape(12.dp),
+                    modifier = Modifier.padding(top = 8.dp)
+                ) {
+                    Text("REINTENTAR")
+                }
+            }
         }
-        Spacer(modifier = Modifier.height(8.dp))
-        Button(onClick = onBack) {
-            Text("Volver")
+        Spacer(modifier = Modifier.height(20.dp))
+        Button(
+            onClick = onAddToCollection,
+            shape = RoundedCornerShape(12.dp),
+            elevation = ButtonDefaults.buttonElevation(defaultElevation = 2.dp)
+        ) {
+            Text("AÑADIR A LA COLECCIÓN")
+        }
+        Spacer(modifier = Modifier.height(12.dp))
+        OutlinedButton(onClick = onBack, shape = RoundedCornerShape(12.dp)) {
+            Text("VOLVER")
         }
     }
 }

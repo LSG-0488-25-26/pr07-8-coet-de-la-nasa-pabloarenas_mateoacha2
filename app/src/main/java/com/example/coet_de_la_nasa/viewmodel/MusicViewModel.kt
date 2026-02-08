@@ -39,6 +39,9 @@ class MusicViewModel(application: Application) : AndroidViewModel(application) {
     private val _detailLoading = MutableLiveData(false)
     val detailLoading: LiveData<Boolean> = _detailLoading
 
+    private val _detailError = MutableLiveData<String?>(null)
+    val detailError: LiveData<String?> = _detailError
+
     fun setQuery(query: String) {
         _currentQuery.value = query
     }
@@ -82,18 +85,22 @@ class MusicViewModel(application: Application) : AndroidViewModel(application) {
 
     fun loadDetail(mbid: String) {
         _releaseGroupDetail.value = null
+        _detailError.value = null
         _detailLoading.value = true
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                kotlinx.coroutines.delay(500)
+                kotlinx.coroutines.delay(1100)
                 val result = repository.lookupReleaseGroup(mbid)
                 withContext(Dispatchers.Main) {
                     _detailLoading.value = false
-                    _releaseGroupDetail.value = result.getOrNull()
+                    result
+                        .onSuccess { _releaseGroupDetail.value = it }
+                        .onFailure { _detailError.value = friendlyMessage(it.message) }
                 }
             } catch (e: Exception) {
                 withContext(Dispatchers.Main) {
                     _detailLoading.value = false
+                    _detailError.value = friendlyMessage(e.message)
                 }
             }
         }
@@ -101,17 +108,22 @@ class MusicViewModel(application: Application) : AndroidViewModel(application) {
 
     fun clearDetail() {
         _releaseGroupDetail.value = null
+        _detailError.value = null
     }
 
     private fun friendlyMessage(raw: String?): String {
-        if (raw.isNullOrBlank()) return "Error de connexio"
+        if (raw.isNullOrBlank()) return "No se han podido cargar los detalles. Reintenta."
         return when {
             raw.contains("Connection reset", ignoreCase = true) ->
-                "La connexio s'ha tancat. Comprova el Wi-Fi o les dades i torna a intentar."
+                "La conexión se ha cerrado. Comprueba el Wi-Fi o los datos y vuelve a intentar."
             raw.contains("timeout", ignoreCase = true) ->
-                "Temps esgotat. Comprova la connexio i torna a intentar."
+                "Tiempo agotado. Comprueba la conexión y vuelve a intentar."
             raw.contains("Unable to resolve host", ignoreCase = true) ->
-                "Sense connexio a Internet. Comprova la xarxa."
+                "Sin conexión a Internet. Comprueba la red."
+            raw.contains("HTTP 503", ignoreCase = true) ->
+                "Servidor ocupado. Espera un momento y pulsa REINTENTAR."
+            raw.contains("Expected ", ignoreCase = true) || raw.contains("Json", ignoreCase = true) ->
+                "Error al interpretar los datos. Reintenta más tarde."
             else -> raw
         }
     }
