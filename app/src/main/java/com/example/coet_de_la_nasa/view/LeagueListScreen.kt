@@ -14,16 +14,11 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -48,7 +43,7 @@ fun LeagueListScreen(
     val releaseGroups = vm.releaseGroups.observeAsState(emptyList())
     val isLoading = vm.isLoading.observeAsState(false)
     val error = vm.error.observeAsState(null)
-    var query by remember { mutableStateOf("rock") }
+    val query = vm.currentQuery.observeAsState("")
 
     Scaffold(
         topBar = {
@@ -70,22 +65,12 @@ fun LeagueListScreen(
                     .fillMaxSize()
                     .padding(16.dp)
             ) {
-                OutlinedTextField(
-                    value = query,
-                    onValueChange = { query = it },
-                    label = { Text("Buscar álbumes (ej: rock, beatles)") },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 8.dp),
-                    singleLine = true
+                SearchBar(
+                    query = query.value,
+                    onQueryChange = { vm.setQuery(it) },
+                    onSearch = { vm.search(query.value) },
+                    enabled = !isLoading.value && query.value.isNotBlank()
                 )
-                Button(
-                    onClick = { vm.search(query) },
-                    modifier = Modifier.padding(bottom = 16.dp),
-                    enabled = !isLoading.value && query.isNotBlank()
-                ) {
-                    Text("Buscar")
-                }
 
                 when {
                     isLoading.value -> {
@@ -97,11 +82,20 @@ fun LeagueListScreen(
                         }
                     }
                     error.value != null -> {
-                        Text(
-                            text = error.value ?: "Error",
-                            style = MaterialTheme.typography.bodyLarge,
-                            modifier = Modifier.padding(16.dp)
-                        )
+                        Column(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(16.dp),
+                            verticalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            Text(
+                                text = error.value ?: "Error",
+                                style = MaterialTheme.typography.bodyLarge
+                            )
+                            Button(onClick = { vm.search(query.value) }) {
+                                Text("Tornar a intentar")
+                            }
+                        }
                     }
                     else -> {
                         BoxWithConstraints(modifier = Modifier.fillMaxSize()) {

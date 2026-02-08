@@ -29,12 +29,16 @@ class MusicViewModel(application: Application) : AndroidViewModel(application) {
     private val _error = MutableLiveData<String?>(null)
     val error: LiveData<String?> = _error
 
-    init {
-        search("rock")
+    private val _currentQuery = MutableLiveData("")
+    val currentQuery: LiveData<String> = _currentQuery
+
+    fun setQuery(query: String) {
+        _currentQuery.value = query
     }
 
     fun search(query: String, limit: Int = 20) {
         if (query.isBlank()) return
+        _currentQuery.value = query
         _isLoading.value = true
         _error.value = null
 
@@ -46,12 +50,12 @@ class MusicViewModel(application: Application) : AndroidViewModel(application) {
                     _isLoading.value = false
                     result
                         .onSuccess { _releaseGroups.value = it }
-                        .onFailure { _error.value = it.message ?: "Error de red" }
+                        .onFailure { _error.value = friendlyMessage(it.message) }
                 }
             } catch (e: Exception) {
                 withContext(Dispatchers.Main) {
                     _isLoading.value = false
-                    _error.value = e.message ?: "Error de conexión"
+                    _error.value = friendlyMessage(e.message)
                 }
             }
         }
@@ -66,6 +70,19 @@ class MusicViewModel(application: Application) : AndroidViewModel(application) {
     fun removeFromCollection(mbid: String) {
         viewModelScope.launch(Dispatchers.IO) {
             dao.deleteByMbid(mbid)
+        }
+    }
+
+    private fun friendlyMessage(raw: String?): String {
+        if (raw.isNullOrBlank()) return "Error de connexio"
+        return when {
+            raw.contains("Connection reset", ignoreCase = true) ->
+                "La connexio s'ha tancat. Comprova el Wi-Fi o les dades i torna a intentar."
+            raw.contains("timeout", ignoreCase = true) ->
+                "Temps esgotat. Comprova la connexio i torna a intentar."
+            raw.contains("Unable to resolve host", ignoreCase = true) ->
+                "Sense connexio a Internet. Comprova la xarxa."
+            else -> raw
         }
     }
 }

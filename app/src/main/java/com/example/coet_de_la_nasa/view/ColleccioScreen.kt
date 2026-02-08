@@ -51,6 +51,10 @@ fun ColleccioScreen(
     val vm: MusicViewModel = viewModel(factory = MusicViewModelFactory(app))
     val saved = vm.savedAlbums.observeAsState(emptyList())
 
+    val punts = saved.value.size
+    val objectiu = 5
+    val objectiuAssolit = punts >= objectiu
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -59,6 +63,13 @@ fun ColleccioScreen(
                     IconButton(onClick = { navController.popBackStack() }) {
                         Icon(Icons.Default.ArrowBack, contentDescription = "Enrere")
                     }
+                },
+                actions = {
+                    Text(
+                        text = "Punts: $punts",
+                        style = MaterialTheme.typography.titleMedium,
+                        modifier = Modifier.padding(end = 16.dp)
+                    )
                 }
             )
         },
@@ -72,25 +83,46 @@ fun ColleccioScreen(
                     .padding(padding),
                 contentAlignment = Alignment.Center
             ) {
-                Text(
-                    text = "Encara no tens albums. Busca i afegeix-ne des del detall.",
-                    style = MaterialTheme.typography.bodyLarge,
-                    modifier = Modifier.padding(24.dp)
-                )
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(
+                        text = "Punts: 0. Objectiu: $objectiu albums.",
+                        style = MaterialTheme.typography.titleMedium,
+                        modifier = Modifier.padding(24.dp)
+                    )
+                    Text(
+                        text = "Busca albums i afegeix-los des del detall per sumar punts.",
+                        style = MaterialTheme.typography.bodyLarge,
+                        modifier = Modifier.padding(horizontal = 24.dp)
+                    )
+                }
             }
         } else {
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding),
-                contentPadding = PaddingValues(16.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                items(saved.value) { album ->
-                    SavedAlbumCard(
-                        album = album,
-                        onDelete = { vm.removeFromCollection(album.mbid) }
+            Column(modifier = Modifier.fillMaxSize().padding(padding)) {
+                if (objectiuAssolit) {
+                    Text(
+                        text = "Objectiu assolit! Tens $punts punts.",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.padding(16.dp)
                     )
+                } else {
+                    Text(
+                        text = "Punts: $punts / Objectiu: $objectiu albums",
+                        style = MaterialTheme.typography.bodyLarge,
+                        modifier = Modifier.padding(16.dp)
+                    )
+                }
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    items(saved.value) { album ->
+                        SavedAlbumCard(
+                            album = album,
+                            onDelete = { vm.removeFromCollection(album.mbid) }
+                        )
+                    }
                 }
             }
         }

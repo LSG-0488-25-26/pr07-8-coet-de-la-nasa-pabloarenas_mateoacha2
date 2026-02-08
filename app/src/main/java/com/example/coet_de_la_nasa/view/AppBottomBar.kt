@@ -21,10 +21,7 @@ fun AppBottomBar(
             selected = currentRoute == Routes.LeagueList.route,
             onClick = {
                 if (currentRoute != Routes.LeagueList.route) {
-                    navController.navigate(Routes.LeagueList.route) {
-                        popUpTo(Routes.LeagueList.route) { inclusive = true }
-                        launchSingleTop = true
-                    }
+                    navController.popBackStack()
                 }
             },
             icon = { Icon(Icons.Default.Album, contentDescription = "Albums") },
