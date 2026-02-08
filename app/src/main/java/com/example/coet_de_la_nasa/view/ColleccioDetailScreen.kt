@@ -16,6 +16,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.DeleteSweep
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -23,10 +24,16 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -38,6 +45,7 @@ import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.coet_de_la_nasa.local.SavedAlbum
 import com.example.coet_de_la_nasa.nav.Routes
+import com.example.coet_de_la_nasa.util.encodeForNav
 import com.example.coet_de_la_nasa.viewmodel.MusicViewModel
 import com.example.coet_de_la_nasa.viewmodel.MusicViewModelFactory
 
@@ -56,6 +64,7 @@ fun ColleccioDetailScreen(
     val objectiu = 5
     val punts = albums.size
     val objectiuAssolit = punts >= objectiu
+    var showDeleteCollectionDialog by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -70,8 +79,11 @@ fun ColleccioDetailScreen(
                     Text(
                         text = "Puntos: $punts",
                         style = MaterialTheme.typography.titleMedium,
-                        modifier = Modifier.padding(end = 16.dp)
+                        modifier = Modifier.padding(end = 8.dp)
                     )
+                    IconButton(onClick = { showDeleteCollectionDialog = true }) {
+                        Icon(Icons.Default.DeleteSweep, contentDescription = "Eliminar colección")
+                    }
                 }
             )
         },
@@ -133,21 +145,54 @@ fun ColleccioDetailScreen(
                     items(albums) { album ->
                         SavedAlbumCard(
                             album = album,
-                            onDelete = { vm.removeFromCollection(album.mbid, collectionId) }
+                            onDelete = { vm.removeFromCollection(album.mbid, collectionId) },
+                            onClick = {
+                                navController.navigate(
+                                    Routes.LeagueDetail.createRoute(
+                                        album.mbid,
+                                        encodeForNav(album.title),
+                                        encodeForNav(album.artistName)
+                                    )
+                                )
+                            }
                         )
                     }
                 }
             }
         }
     }
+
+    if (showDeleteCollectionDialog) {
+        AlertDialog(
+            onDismissRequest = { showDeleteCollectionDialog = false },
+            title = { Text("Eliminar colección") },
+            text = { Text("¿Eliminar esta colección? Se borrarán todos los álbumes que contiene.") },
+            confirmButton = {
+                TextButton(onClick = {
+                    vm.deleteCollection(collectionId)
+                    showDeleteCollectionDialog = false
+                    navController.popBackStack()
+                }) {
+                    Text("Eliminar", color = MaterialTheme.colorScheme.error)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDeleteCollectionDialog = false }) {
+                    Text("Cancelar")
+                }
+            }
+        )
+    }
 }
 
 @Composable
 private fun SavedAlbumCard(
     album: SavedAlbum,
-    onDelete: () -> Unit
+    onDelete: () -> Unit,
+    onClick: () -> Unit
 ) {
     Card(
+        onClick = onClick,
         shape = RoundedCornerShape(20.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),

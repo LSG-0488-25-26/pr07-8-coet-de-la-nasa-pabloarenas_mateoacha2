@@ -18,7 +18,29 @@ Pantalla de detalle que se muestra al hacer clic en una card. Muestra la imagen 
 
 ## PR08 - Cohete de la NASA
 
-*(Aquí irán las 4 capturas del flujo: lista con SearchBar, detalle álbum, colecciones, detalle colección.)*
+### Vista inicial - Buscar álbumes
+
+![Vista inicial - Buscar álbumes](capturas/Captura%20de%20pantalla%202026-02-08%20224055.png)
+
+Pantalla principal de MusicBrainz - Albums con la SearchBar para buscar álbumes (ej: rock, beatles). Incluye enlace "La meva colleccio" y barra inferior con Albums y Colleccio.
+
+### Lista de resultados - Álbumes encontrados
+
+![Lista de resultados](capturas/Captura%20de%20pantalla%202026-02-08%20224111.png)
+
+Resultados de la búsqueda mostrados en cards con portada, título, artista y fecha. Al pulsar una card se abre el detalle del álbum.
+
+### Vista detalle - Información del álbum
+
+![Vista detalle del álbum](capturas/Captura%20de%20pantalla%202026-02-08%20224127.png)
+
+Pantalla de detalle que se muestra al hacer clic en un álbum. Muestra portada, título, artista, lanzamientos y número de pistas. Incluye botón "AÑADIR A LA COLECCIÓN" y "VOLVER".
+
+### Añadir a colección - Elegir colección
+
+![Añadir a colección](capturas/Captura%20de%20pantalla%202026-02-08%20224136.png)
+
+Diálogo para elegir en qué colección guardar el álbum. Se listan las colecciones existentes con el número de álbumes. Al seleccionar una, el álbum se añade y se vuelve atrás.
 
 ---
 
