@@ -22,6 +22,10 @@ fun MyAppNavHost(modifier: Modifier = Modifier) {
             LeagueListScreen(navController = navController)
         }
 
+        composable(Routes.Colleccio.route) {
+            ColleccioScreen(navController = navController)
+        }
+
         composable(
             route = Routes.LeagueDetail.route,
             arguments = listOf(

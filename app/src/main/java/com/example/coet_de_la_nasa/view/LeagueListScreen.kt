@@ -12,6 +12,7 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -26,12 +27,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import android.app.Application
 import com.example.coet_de_la_nasa.nav.Routes
 import com.example.coet_de_la_nasa.util.encodeForNav
 import com.example.coet_de_la_nasa.viewmodel.MusicViewModel
+import com.example.coet_de_la_nasa.viewmodel.MusicViewModelFactory
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -39,7 +43,8 @@ fun LeagueListScreen(
     navController: NavController,
     modifier: Modifier = Modifier
 ) {
-    val vm: MusicViewModel = viewModel()
+    val app = LocalContext.current.applicationContext as Application
+    val vm: MusicViewModel = viewModel(factory = MusicViewModelFactory(app))
     val releaseGroups = vm.releaseGroups.observeAsState(emptyList())
     val isLoading = vm.isLoading.observeAsState(false)
     val error = vm.error.observeAsState(null)
@@ -47,7 +52,14 @@ fun LeagueListScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(title = { Text("MusicBrainz - Álbumes") })
+            TopAppBar(
+                title = { Text("MusicBrainz - Albums") },
+                actions = {
+                    TextButton(onClick = { navController.navigate(Routes.Colleccio.route) }) {
+                        Text("La meva colleccio")
+                    }
+                }
+            )
         },
         modifier = modifier
     ) { padding ->

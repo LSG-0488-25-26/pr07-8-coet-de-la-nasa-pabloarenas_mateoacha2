@@ -1,5 +1,6 @@
 package com.example.coet_de_la_nasa.view
 
+import android.app.Application
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -19,10 +20,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.coet_de_la_nasa.util.decodeFromNav
+import com.example.coet_de_la_nasa.viewmodel.MusicViewModel
+import com.example.coet_de_la_nasa.viewmodel.MusicViewModelFactory
 
 private const val COVER_ART_BASE = "https://coverartarchive.org/release-group/"
 
@@ -38,6 +43,9 @@ fun LeagueDetailScreen(
     val title = decodeFromNav(titleEncoded)
     val artistName = decodeFromNav(artistNameEncoded)
     val coverUrl = "$COVER_ART_BASE$mbid/front-500.jpg"
+
+    val app = LocalContext.current.applicationContext as Application
+    val vm: MusicViewModel = viewModel(factory = MusicViewModelFactory(app))
 
     Scaffold(
         topBar = { TopAppBar(title = { Text(title) }) },
@@ -71,7 +79,14 @@ fun LeagueDetailScreen(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(top = 4.dp)
             )
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(16.dp))
+            Button(onClick = {
+                vm.addToCollection(mbid, title, artistName, coverUrl)
+                navController.popBackStack()
+            }) {
+                Text("Afegir a la colleccio")
+            }
+            Spacer(modifier = Modifier.height(8.dp))
             Button(onClick = { navController.popBackStack() }) {
                 Text("Volver")
             }
