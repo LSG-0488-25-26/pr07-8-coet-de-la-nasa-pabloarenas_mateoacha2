@@ -42,6 +42,24 @@ Pantalla de detalle que se muestra al hacer clic en un álbum. Muestra portada, 
 
 Diálogo para elegir en qué colección guardar el álbum. Se listan las colecciones existentes con el número de álbumes. Al seleccionar una, el álbum se añade y se vuelve atrás.
 
+### Colecciones - Lista de colecciones
+
+![Lista de colecciones](capturas/Captura%20de%20pantalla%202026-02-08%20224149.png)
+
+Pantalla COLECCIONES con la lista de colecciones creadas (nombre y número de álbums). Incluye botón flotante + para crear una nueva colección y barra inferior para alternar entre Albums y Colleccio.
+
+### Detalle de colección - Álbumes guardados
+
+![Detalle de colección](capturas/Captura%20de%20pantalla%202026-02-08%20224158.png)
+
+Al pulsar una colección se muestra el detalle con los álbumes guardados, los puntos y el objetivo (ej. ¡Objetivo alcanzado! 5 puntos). Cada álbum puede eliminarse de la colección o pulsarse para ver su información.
+
+### Nueva colección - Crear colección
+
+![Nueva colección](capturas/Captura%20de%20pantalla%202026-02-08%20224207.png)
+
+Diálogo para crear una nueva colección: campo Nombre y botones Cancelar y Crear. Se abre al pulsar el botón + en la pantalla de colecciones.
+
 ---
 
 **Hecho por:** Pablo Arenas y Mateo Acha
