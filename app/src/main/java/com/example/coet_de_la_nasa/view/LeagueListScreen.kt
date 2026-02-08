@@ -1,33 +1,21 @@
 package com.example.coet_de_la_nasa.view
 
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import android.app.Application
+import com.example.coet_de_la_nasa.model.ReleaseGroupItemUi
 import com.example.coet_de_la_nasa.nav.Routes
 import com.example.coet_de_la_nasa.util.encodeForNav
 import com.example.coet_de_la_nasa.viewmodel.MusicViewModel
@@ -61,77 +49,48 @@ fun LeagueListScreen(
         modifier = modifier
     ) { padding ->
         Box(modifier = Modifier.fillMaxSize().padding(padding)) {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(16.dp)
-            ) {
-                SearchBar(
-                    query = query.value,
-                    onQueryChange = { vm.setQuery(it) },
-                    onSearch = { vm.search(query.value) },
-                    enabled = !isLoading.value && query.value.isNotBlank(),
-                    modifier = Modifier.padding(bottom = 16.dp)
-                )
-
-                when {
-                    isLoading.value -> {
-                        Box(
-                            modifier = Modifier.fillMaxSize(),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            CircularProgressIndicator()
-                        }
-                    }
-                    error.value != null -> {
-                        Column(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(16.dp),
-                            verticalArrangement = Arrangement.spacedBy(16.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            Text(
-                                text = error.value ?: "Error",
-                                style = MaterialTheme.typography.bodyLarge,
-                                color = MaterialTheme.colorScheme.error
-                            )
-                            Button(
-                                onClick = { vm.search(query.value) },
-                                shape = RoundedCornerShape(12.dp)
-                            ) {
-                                Text("Tornar a intentar")
-                            }
-                        }
-                    }
-                    else -> {
-                        BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
-                            val horizontalPadding = if (maxWidth < 600.dp) 16.dp else 48.dp
-                            LazyColumn(
-                                verticalArrangement = Arrangement.spacedBy(12.dp),
-                                contentPadding = PaddingValues(bottom = 72.dp, start = horizontalPadding, end = horizontalPadding),
-                                modifier = Modifier.fillMaxSize()
-                            ) {
-                                items(releaseGroups.value) { item ->
-                                    LeagueCard(
-                                        title = item.title,
-                                        artistName = item.artistName,
-                                        coverUrl = item.coverUrl,
-                                        primaryType = item.primaryType,
-                                        firstReleaseDate = item.firstReleaseDate
-                                    ) {
-                                        navController.navigate(
-                                            Routes.LeagueDetail.createRoute(
-                                                mbid = item.mbid,
-                                                title = encodeForNav(item.title),
-                                                artistName = encodeForNav(item.artistName)
-                                            )
-                                        )
-                                    }
-                                }
-                            }
-                        }
-                    }
+            androidx.compose.foundation.layout.BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+                val windowSize = windowSizeFromWidth(maxWidth)
+                val onItemClick: (ReleaseGroupItemUi) -> Unit = { item ->
+                    navController.navigate(
+                        Routes.LeagueDetail.createRoute(
+                            mbid = item.mbid,
+                            title = encodeForNav(item.title),
+                            artistName = encodeForNav(item.artistName)
+                        )
+                    )
+                }
+                when (windowSize) {
+                    WindowSize.Compact -> LeagueListCompactView(
+                        items = releaseGroups.value,
+                        isLoading = isLoading.value,
+                        error = error.value,
+                        query = query.value,
+                        onQueryChange = { vm.setQuery(it) },
+                        onSearch = { vm.search(query.value) },
+                        onRetry = { vm.search(query.value) },
+                        onItemClick = onItemClick
+                    )
+                    WindowSize.Medium -> LeagueListMediumView(
+                        items = releaseGroups.value,
+                        isLoading = isLoading.value,
+                        error = error.value,
+                        query = query.value,
+                        onQueryChange = { vm.setQuery(it) },
+                        onSearch = { vm.search(query.value) },
+                        onRetry = { vm.search(query.value) },
+                        onItemClick = onItemClick
+                    )
+                    WindowSize.Extended -> LeagueListExtendedView(
+                        items = releaseGroups.value,
+                        isLoading = isLoading.value,
+                        error = error.value,
+                        query = query.value,
+                        onQueryChange = { vm.setQuery(it) },
+                        onSearch = { vm.search(query.value) },
+                        onRetry = { vm.search(query.value) },
+                        onItemClick = onItemClick
+                    )
                 }
             }
         }

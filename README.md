@@ -16,4 +16,10 @@ Pantalla de detalle que se muestra al hacer clic en una card. Muestra la imagen 
 
 ---
 
+## PR08 - Cohete de la NASA
+
+*(Aquí irán las 4 capturas del flujo: lista con SearchBar, detalle álbum, colecciones, detalle colección.)*
+
+---
+
 **Hecho por:** Pablo Arenas y Mateo Acha
