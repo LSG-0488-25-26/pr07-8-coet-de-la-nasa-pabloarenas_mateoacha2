@@ -18,11 +18,12 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
-import com.example.coet_de_la_nasa.model.LeagueItemUi
 
 @Composable
 fun LeagueCard(
-    league: LeagueItemUi,
+    title: String,
+    artistName: String,
+    coverUrl: String,
     contentPadding: PaddingValues = PaddingValues(0.dp),
     onClick: () -> Unit
 ) {
@@ -35,23 +36,22 @@ fun LeagueCard(
     ) {
         Column(modifier = Modifier.padding(contentPadding)) {
             AsyncImage(
-                model = league.logoUrl,
-                contentDescription = league.name,
+                model = coverUrl,
+                contentDescription = title,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(160.dp)
                     .clip(RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp))
             )
-
             Column(modifier = Modifier.padding(12.dp)) {
                 Text(
-                    text = league.name,
+                    text = title,
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold
                 )
                 Text(
-                    text = league.abbreviation,
+                    text = artistName,
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )

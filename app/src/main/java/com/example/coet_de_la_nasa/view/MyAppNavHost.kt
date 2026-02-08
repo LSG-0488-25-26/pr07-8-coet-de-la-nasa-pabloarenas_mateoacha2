@@ -25,14 +25,16 @@ fun MyAppNavHost(modifier: Modifier = Modifier) {
         composable(
             route = Routes.LeagueDetail.route,
             arguments = listOf(
-                navArgument("leagueId") { type = NavType.StringType },
-                navArgument("leagueName") { type = NavType.StringType }
+                navArgument("mbid") { type = NavType.StringType },
+                navArgument("title") { type = NavType.StringType },
+                navArgument("artistName") { type = NavType.StringType }
             )
         ) { backStackEntry ->
             LeagueDetailScreen(
                 navController = navController,
-                leagueId = backStackEntry.arguments?.getString("leagueId") ?: "",
-                leagueName = backStackEntry.arguments?.getString("leagueName") ?: ""
+                mbid = backStackEntry.arguments?.getString("mbid") ?: "",
+                titleEncoded = backStackEntry.arguments?.getString("title") ?: "",
+                artistNameEncoded = backStackEntry.arguments?.getString("artistName") ?: ""
             )
         }
     }
